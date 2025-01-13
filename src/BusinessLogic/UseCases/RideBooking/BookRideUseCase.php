@@ -3,14 +3,16 @@
 namespace App\BusinessLogic\UseCases\RideBooking;
 
 use App\Models\Ride;
-use App\Models\RideDistanceCalculator;
+use App\Models\BasePriceEvaluator;
 use App\Repositories\RideRepository;
+use App\Models\RideDistanceCalculator;
 
 readonly class BookRideUseCase
 {
 
     public function __construct(private RideRepository         $rideRepository,
-                                private RideDistanceCalculator $rideDistanceCalculator)
+                                private RideDistanceCalculator $rideDistanceCalculator,
+                                private BasePriceEvaluator     $basePriceEvaluator)
     {
     }
 
@@ -18,7 +20,8 @@ readonly class BookRideUseCase
     function execute(string $departure, string $arrival): void
     {
         $distance = $this->rideDistanceCalculator->calculate($departure, $arrival);
-        $price = 30 + $distance * 0.5;
+        $basePrice = $this->basePriceEvaluator->evaluate($departure, $arrival);
+        $price = $basePrice + $distance * 0.5;
         $this->rideRepository->save(new Ride("123abc",
             $departure,
             $arrival,
