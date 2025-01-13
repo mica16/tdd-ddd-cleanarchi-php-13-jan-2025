@@ -4,16 +4,15 @@ namespace App\Models;
 
 class FakeBasePriceEvaluator implements BasePriceEvaluator {
 
-    public function evaluate(string $departure, string $arrival): float
+    private array $basePricesPerDirections = [
+        "PARIS => PARIS" => 30,
+        "OUTSIDE => PARIS" => 50,
+        "PARIS => OUTSIDE" => 20,
+        "OUTSIDE => OUTSIDE" => 100
+    ];
+
+    public function evaluate(string $tripDirection): float
     {
-        $isDepartureFromParis = str_contains(strtolower($departure), 'paris');
-        $isArrivalToParis = str_contains(strtolower($arrival), 'paris');
-        return match(true)
-        {
-            $isDepartureFromParis && !$isArrivalToParis =>  20,
-            !$isDepartureFromParis && !$isArrivalToParis =>  100,
-            !$isDepartureFromParis && $isArrivalToParis =>  50,
-            default =>  30,
-        };
+        return $this->basePricesPerDirections[$tripDirection];
     }
 }

@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 use App\Models\FakeBasePriceEvaluator;
 use PHPUnit\Framework\Attributes\Test;
 use App\Repositories\FakeRideRepository;
-use App\Models\FakeRideDistanceCalculator;
+use App\Models\FakeTripScanner;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class BookRideUseCaseTest extends TestCase
@@ -19,7 +19,7 @@ class BookRideUseCaseTest extends TestCase
 
     private FakeRideRepository $rideRepository;
     private FakeRiderRepository $riderRepository;
-    private FakeRideDistanceCalculator $rideDistanceCalculator;
+    private FakeTripScanner $tripScanner;
     private FakeBasePriceEvaluator $basePriceEvaluator;
     private DeterministicDateTimeProvider $dateTimeProvider;
     private string $rideId = "123abc";
@@ -28,7 +28,7 @@ class BookRideUseCaseTest extends TestCase
     {
         $this->rideRepository = new FakeRideRepository();
         $this->riderRepository = new FakeRiderRepository();
-        $this->rideDistanceCalculator = new FakeRideDistanceCalculator();
+        $this->tripScanner = new FakeTripScanner();
         $this->basePriceEvaluator = new FakeBasePriceEvaluator();
         $this->dateTimeProvider = new DeterministicDateTimeProvider();
         $this->dateTimeProvider->currentDate = new \DateTime('2021-10-21');
@@ -53,7 +53,7 @@ class BookRideUseCaseTest extends TestCase
         float  $expectedPrice
     ): void
     {
-        $this->rideDistanceCalculator->distance = $distance;
+        $this->tripScanner->distance = $distance;
         $this->bookRide($departure, $arrival);
         $this->assertBookedRides(new Ride($this->rideId, $departure, $arrival, $expectedPrice));
     }
@@ -61,7 +61,7 @@ class BookRideUseCaseTest extends TestCase
     #[Test]
     public function should_be_charged_for_a_uber_x_ride_in_case_of_long_trip_and_no_birthday(): void
     {
-        $this->rideDistanceCalculator->distance = 3;
+        $this->tripScanner->distance = 3;
         $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true);
         $this->assertBookedRides(new Ride($this->rideId,
             'PARIS_ADDRESS', 'PARIS_ADDRESS', 41.5));
@@ -70,7 +70,7 @@ class BookRideUseCaseTest extends TestCase
     #[Test]
     public function cannot_book_a_uber_x_ride_in_case_of_short_trip(): void
     {
-        $this->rideDistanceCalculator->distance = 1;
+        $this->tripScanner->distance = 1;
         $this->expectException(\Exception::class);
         $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true);
         $this->assertBookedRides();
@@ -80,7 +80,7 @@ class BookRideUseCaseTest extends TestCase
     public function should_be_offered_a_uber_x_ride_in_case_of_long_trip_and_birthday(): void
     {
         $this->dateTimeProvider->currentDate = new \DateTime('2021-02-03');
-        $this->rideDistanceCalculator->distance = 3;
+        $this->tripScanner->distance = 3;
         $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true);
         $this->assertBookedRides(new Ride($this->rideId,
             'PARIS_ADDRESS', 'PARIS_ADDRESS', 31.5));
@@ -90,7 +90,7 @@ class BookRideUseCaseTest extends TestCase
     public function cannot_book_a_uber_x_ride_in_case_of_short_trip_and_birthday(): void
     {
         $this->dateTimeProvider->currentDate = new \DateTime('2021-02-03');
-        $this->rideDistanceCalculator->distance = 1;
+        $this->tripScanner->distance = 1;
         $this->expectException(\Exception::class);
         $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true);
         $this->assertBookedRides();
@@ -98,7 +98,7 @@ class BookRideUseCaseTest extends TestCase
 
     public function bookRide(string $departure, string $arrival, bool $wantsUberX = false): void
     {
-        new BookRideUseCase($this->rideRepository, $this->riderRepository, $this->rideDistanceCalculator, $this->basePriceEvaluator, $this->dateTimeProvider)
+        new BookRideUseCase($this->rideRepository, $this->riderRepository, $this->tripScanner, $this->basePriceEvaluator, $this->dateTimeProvider)
             ->execute($departure, $arrival, $wantsUberX);
     }
 

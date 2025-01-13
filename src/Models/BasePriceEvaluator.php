@@ -3,5 +3,5 @@
 namespace App\Models;
 
 interface BasePriceEvaluator {
-    function evaluate(string $departure, string $arrival): float;
+    function evaluate(string $tripDirection): float;
 }
