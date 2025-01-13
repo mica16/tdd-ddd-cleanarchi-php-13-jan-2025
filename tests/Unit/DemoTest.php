@@ -9,6 +9,6 @@ class DemoTest extends TestCase
 {
     public function testSomething(): void
     {
-        $this->assertEquals('Hello World', (new Demo())->returnSomething());
+        $this->assertEquals('Hello World', new Demo()->returnSomething());
     }
 }

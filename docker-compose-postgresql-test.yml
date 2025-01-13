@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  postgres_test:
+    image: postgres:13.1-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: wealcome
+      POSTGRES_PASSWORD: wealcome
+      POSTGRES_DB: schooly_db_test
+    ports:
+      - 5436:5432
+    volumes:
+      - ./docker-postgresql-data-for-test:/var/lib/postgresql/data
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
