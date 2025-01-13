@@ -16,3 +16,6 @@
 
 .DS_Store
 infection/
+
+docker-postgresql-data-for-test/
+docker-postgresql-data-for-dev/
