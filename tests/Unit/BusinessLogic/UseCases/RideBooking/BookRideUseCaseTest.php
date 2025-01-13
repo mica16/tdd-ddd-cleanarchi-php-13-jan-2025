@@ -37,7 +37,7 @@ class BookRideUseCaseTest extends TestCase
 
     #[DataProvider("distinctTrips")]
     #[Test]
-    public function should_book_a_ride_successfully(
+    public function should_book_a_basic_ride_successfully(
         string $departure,
         string $arrival,
         float  $distance,
@@ -49,15 +49,51 @@ class BookRideUseCaseTest extends TestCase
         $this->assertBookedRides(new Ride($this->rideId, $departure, $arrival, $expectedPrice));
     }
 
-    public function bookRide(string $departure, string $arrival): void
+    #[Test]
+    public function should_be_charged_for_a_uber_x_ride_in_case_of_long_trip_and_no_birthday(): void
     {
-        new BookRideUseCase($this->rideRepository, $this->rideDistanceCalculator, $this->basePriceEvaluator)
-            ->execute($departure, $arrival);
+        $this->rideDistanceCalculator->distance = 3;
+        $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true);
+        $this->assertBookedRides(new Ride($this->rideId,
+            'PARIS_ADDRESS', 'PARIS_ADDRESS', 41.5));
     }
 
-    public function assertBookedRides(Ride $ride): void
+    #[Test]
+    public function cannot_book_a_uber_x_ride_in_case_of_short_trip(): void
     {
-        $this->assertEquals([$ride], $this->rideRepository->rides);
+        $this->rideDistanceCalculator->distance = 1;
+        $this->expectException(\Exception::class);
+        $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true);
+        $this->assertBookedRides();
+    }
+
+    #[Test]
+    public function should_be_offered_a_uber_x_ride_in_case_of_long_trip_and_birthday(): void
+    {
+        $this->rideDistanceCalculator->distance = 3;
+        $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true, isRiderBirthday: true);
+        $this->assertBookedRides(new Ride($this->rideId,
+            'PARIS_ADDRESS', 'PARIS_ADDRESS', 31.5));
+    }
+
+    #[Test]
+    public function cannot_book_a_uber_x_ride_in_case_of_short_trip_and_birthday(): void
+    {
+        $this->rideDistanceCalculator->distance = 1;
+        $this->expectException(\Exception::class);
+        $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true, isRiderBirthday: true);
+        $this->assertBookedRides();
+    }
+
+    public function bookRide(string $departure, string $arrival, bool $wantsUberX = false, $isRiderBirthday = false): void
+    {
+        new BookRideUseCase($this->rideRepository, $this->rideDistanceCalculator, $this->basePriceEvaluator)
+            ->execute($departure, $arrival, $wantsUberX, $isRiderBirthday);
+    }
+
+    public function assertBookedRides(Ride... $rides): void
+    {
+        $this->assertEquals($rides, $this->rideRepository->rides);
     }
 
 }
