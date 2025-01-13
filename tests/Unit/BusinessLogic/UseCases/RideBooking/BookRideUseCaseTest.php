@@ -2,28 +2,37 @@
 
 namespace App\Tests\Unit\BusinessLogic\UseCases\RideBooking;
 
+use App\BusinessLogic\UseCases\RideBooking\BookRideUseCase;
+use App\Models\DeterministicDateTimeProvider;
+use App\Models\FakeRiderRepository;
 use App\Models\Ride;
+use App\Models\Rider;
 use PHPUnit\Framework\TestCase;
 use App\Models\FakeBasePriceEvaluator;
 use PHPUnit\Framework\Attributes\Test;
 use App\Repositories\FakeRideRepository;
 use App\Models\FakeRideDistanceCalculator;
 use PHPUnit\Framework\Attributes\DataProvider;
-use App\BusinessLogic\UseCases\RideBooking\BookRideUseCase;
 
 class BookRideUseCaseTest extends TestCase
 {
 
     private FakeRideRepository $rideRepository;
+    private FakeRiderRepository $riderRepository;
     private FakeRideDistanceCalculator $rideDistanceCalculator;
     private FakeBasePriceEvaluator $basePriceEvaluator;
+    private DeterministicDateTimeProvider $dateTimeProvider;
     private string $rideId = "123abc";
 
     public function setUp(): void
     {
         $this->rideRepository = new FakeRideRepository();
+        $this->riderRepository = new FakeRiderRepository();
         $this->rideDistanceCalculator = new FakeRideDistanceCalculator();
         $this->basePriceEvaluator = new FakeBasePriceEvaluator();
+        $this->dateTimeProvider = new DeterministicDateTimeProvider();
+        $this->dateTimeProvider->currentDate = new \DateTime('2021-10-21');
+        $this->riderRepository->feedWith(new Rider('456def', new \DateTime('1990-02-03')));
     }
 
     public static function distinctTrips(): \Generator
@@ -70,8 +79,9 @@ class BookRideUseCaseTest extends TestCase
     #[Test]
     public function should_be_offered_a_uber_x_ride_in_case_of_long_trip_and_birthday(): void
     {
+        $this->dateTimeProvider->currentDate = new \DateTime('2021-02-03');
         $this->rideDistanceCalculator->distance = 3;
-        $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true, isRiderBirthday: true);
+        $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true);
         $this->assertBookedRides(new Ride($this->rideId,
             'PARIS_ADDRESS', 'PARIS_ADDRESS', 31.5));
     }
@@ -79,16 +89,17 @@ class BookRideUseCaseTest extends TestCase
     #[Test]
     public function cannot_book_a_uber_x_ride_in_case_of_short_trip_and_birthday(): void
     {
+        $this->dateTimeProvider->currentDate = new \DateTime('2021-02-03');
         $this->rideDistanceCalculator->distance = 1;
         $this->expectException(\Exception::class);
-        $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true, isRiderBirthday: true);
+        $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true);
         $this->assertBookedRides();
     }
 
-    public function bookRide(string $departure, string $arrival, bool $wantsUberX = false, $isRiderBirthday = false): void
+    public function bookRide(string $departure, string $arrival, bool $wantsUberX = false): void
     {
-        new BookRideUseCase($this->rideRepository, $this->rideDistanceCalculator, $this->basePriceEvaluator)
-            ->execute($departure, $arrival, $wantsUberX, $isRiderBirthday);
+        new BookRideUseCase($this->rideRepository, $this->riderRepository, $this->rideDistanceCalculator, $this->basePriceEvaluator, $this->dateTimeProvider)
+            ->execute($departure, $arrival, $wantsUberX);
     }
 
     public function assertBookedRides(Ride... $rides): void
