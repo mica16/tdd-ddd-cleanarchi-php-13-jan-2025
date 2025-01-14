@@ -49,14 +49,14 @@ class RideControllerEndToEndTest extends WebTestCase
         $this->riderRepository->feedWith(new Rider('456def', new \DateTime('1990-02-03')));
         $this->dateTimeProvider->currentDate = new \DateTime('1990-02-03');
         $this->client->request('POST', '/api/rides', [
-            'rideId' => '71efde49-0a02-4ede-9cd2-c8f773fd6baf',
+            'rideId' => '123abc',
             'departure' => '8 avenue Foch PARIS',
             'arrival' => '111 avenue Victor Hugo Aubervilliers',
             'uberX' => true
         ]);
         $this->assertResponseStatusCodeSame(201);
 
-        $savedDoctrineRideEntity = $this->entityManager->find(DoctrineRideEntity::class, '71efde49-0a02-4ede-9cd2-c8f773fd6baf');
+        $savedDoctrineRideEntity = $this->entityManager->find(DoctrineRideEntity::class, '123abc');
         $this->assertEquals(new DoctrineRideEntity(
             '123abc',
             "8 avenue Foch PARIS",

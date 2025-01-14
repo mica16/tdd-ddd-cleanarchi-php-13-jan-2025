@@ -7,9 +7,9 @@ services:
     environment:
       POSTGRES_USER: wealcome
       POSTGRES_PASSWORD: wealcome
-      POSTGRES_DB: schooly_db
+      POSTGRES_DB: ubertop_db
     ports:
-      - 5434:5432
+      - 5438:5432
     volumes:
       - ./docker-postgresql-data-for-dev:/var/lib/postgresql/data
       - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
