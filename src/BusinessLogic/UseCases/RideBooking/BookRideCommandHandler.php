@@ -12,8 +12,10 @@ use App\BusinessLogic\Models\DefaultOptionsPricingStrategy;
 use App\BusinessLogic\Models\Ride;
 use App\BusinessLogic\Models\Trip;
 use App\BusinessLogic\Models\UberXOptionsPricingStrategy;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-readonly class BookRideUseCase
+#[AsMessageHandler]
+readonly class BookRideCommandHandler
 {
 
     public function __construct(private RideRepository       $rideRepository,
@@ -25,8 +27,11 @@ readonly class BookRideUseCase
     {
     }
 
-    public function execute(string $departure, string $arrival, bool $wantsUberX): void
+    public function __invoke(BookRideCommand $command): void
     {
+        $departure = $command->departure;
+        $arrival = $command->arrival;
+        $wantsUberX = $command->wantsUberX;
 
         $rider = $this->riderRepository->byId("456def");
         $trip = $this->createTrip($departure, $arrival);
@@ -45,7 +50,6 @@ readonly class BookRideUseCase
         $this->transactionPerformer->perform(function () use ($ride) {
             $this->rideRepository->save($ride);
             // $this->domainEventRepository->save($ride->getDomainEvents());
-            throw new \Exception('Transaction failed');
         });
     }
 

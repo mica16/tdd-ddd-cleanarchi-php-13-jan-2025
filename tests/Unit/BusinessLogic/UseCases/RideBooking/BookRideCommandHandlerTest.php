@@ -8,15 +8,16 @@ use App\Adapters\Secondary\Gateways\Providers\TripScanning\FakeTripScanner;
 use App\Adapters\Secondary\Gateways\Repositories\FakeRideRepository;
 use App\Adapters\Secondary\Gateways\Repositories\FakeRiderRepository;
 use App\BusinessLogic\Gateways\Providers\TransactionPerformer;
-use App\BusinessLogic\UseCases\RideBooking\BookRideUseCase;
 use App\BusinessLogic\Models\DeterministicDateTimeProvider;
 use App\BusinessLogic\Models\Ride;
 use App\BusinessLogic\Models\Rider;
+use App\BusinessLogic\UseCases\RideBooking\BookRideCommand;
+use App\BusinessLogic\UseCases\RideBooking\BookRideCommandHandler;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class BookRideUseCaseTest extends TestCase
+class BookRideCommandHandlerTest extends TestCase
 {
 
     private FakeRideRepository $rideRepository;
@@ -102,13 +103,13 @@ class BookRideUseCaseTest extends TestCase
 
     public function bookRide(string $departure, string $arrival, bool $wantsUberX = false): void
     {
-        new BookRideUseCase($this->rideRepository,
+        new BookRideCommandHandler($this->rideRepository,
             $this->riderRepository,
             $this->tripScanner,
             $this->basePriceEvaluator,
             $this->dateTimeProvider,
             $this->transactionPerformer)
-            ->execute($departure, $arrival, $wantsUberX);
+            ->__invoke(new BookRideCommand($departure, $arrival, $wantsUberX));
     }
 
     public function assertBookedRides(Ride... $rides): void
