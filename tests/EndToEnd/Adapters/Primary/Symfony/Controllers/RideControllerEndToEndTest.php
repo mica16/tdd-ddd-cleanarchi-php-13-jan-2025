@@ -45,7 +45,6 @@ class RideControllerEndToEndTest extends WebTestCase
     #[Test]
     public function should_be_offered_a_uber_x_ride_in_case_of_long_trip_and_birthday()
     {
-        $this->tripScanner->distance = 100;
         $this->riderRepository->feedWith(new Rider('456def', new \DateTime('1990-02-03')));
         $this->dateTimeProvider->currentDate = new \DateTime('1990-02-03');
         $this->client->request('POST', '/api/rides', [
@@ -62,7 +61,7 @@ class RideControllerEndToEndTest extends WebTestCase
             "8 avenue Foch PARIS",
             "111 avenue Victor Hugo Aubervilliers",
             true,
-            70,
+            25.386,
         ), $savedDoctrineRideEntity);
     }
 }
