@@ -3,9 +3,11 @@
 namespace App\Tests\Unit\BusinessLogic\UseCases\RideBooking;
 
 use App\Adapters\Secondary\Gateways\Providers\FakeBasePriceEvaluator;
+use App\Adapters\Secondary\Gateways\Providers\TransactionPerforming\PassiveTransactionPerformer;
 use App\Adapters\Secondary\Gateways\Providers\TripScanning\FakeTripScanner;
 use App\Adapters\Secondary\Gateways\Repositories\FakeRideRepository;
 use App\Adapters\Secondary\Gateways\Repositories\FakeRiderRepository;
+use App\BusinessLogic\Gateways\Providers\TransactionPerformer;
 use App\BusinessLogic\UseCases\RideBooking\BookRideUseCase;
 use App\BusinessLogic\Models\DeterministicDateTimeProvider;
 use App\BusinessLogic\Models\Ride;
@@ -22,6 +24,7 @@ class BookRideUseCaseTest extends TestCase
     private FakeTripScanner $tripScanner;
     private FakeBasePriceEvaluator $basePriceEvaluator;
     private DeterministicDateTimeProvider $dateTimeProvider;
+    private TransactionPerformer $transactionPerformer;
     private string $rideId = "123abc";
 
     public function setUp(): void
@@ -29,6 +32,7 @@ class BookRideUseCaseTest extends TestCase
         $this->rideRepository = new FakeRideRepository();
         $this->riderRepository = new FakeRiderRepository();
         $this->tripScanner = new FakeTripScanner();
+        $this->transactionPerformer = new PassiveTransactionPerformer();
         $this->basePriceEvaluator = new FakeBasePriceEvaluator();
         $this->dateTimeProvider = new DeterministicDateTimeProvider();
         $this->dateTimeProvider->currentDate = new \DateTime('2021-10-21');
@@ -98,7 +102,12 @@ class BookRideUseCaseTest extends TestCase
 
     public function bookRide(string $departure, string $arrival, bool $wantsUberX = false): void
     {
-        new BookRideUseCase($this->rideRepository, $this->riderRepository, $this->tripScanner, $this->basePriceEvaluator, $this->dateTimeProvider)
+        new BookRideUseCase($this->rideRepository,
+            $this->riderRepository,
+            $this->tripScanner,
+            $this->basePriceEvaluator,
+            $this->dateTimeProvider,
+            $this->transactionPerformer)
             ->execute($departure, $arrival, $wantsUberX);
     }
 

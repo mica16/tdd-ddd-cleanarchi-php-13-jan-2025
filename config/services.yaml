@@ -34,3 +34,7 @@ services:
         arguments:
             $apiKey: '%google_maps_api_key%'
         public: true
+
+    App\BusinessLogic\Gateways\Providers\TransactionPerformer:
+        class: 'App\Adapters\Secondary\Gateways\Providers\TransactionPerforming\DoctrineTransactionPerformer'
+        public: true

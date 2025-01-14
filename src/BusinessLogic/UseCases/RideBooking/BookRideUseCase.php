@@ -2,6 +2,7 @@
 
 namespace App\BusinessLogic\UseCases\RideBooking;
 
+use App\BusinessLogic\Gateways\Providers\TransactionPerformer;
 use App\BusinessLogic\Gateways\Providers\TripScanner;
 use App\BusinessLogic\Gateways\Repositories\RideRepository;
 use App\BusinessLogic\Gateways\Repositories\RiderRepository;
@@ -15,16 +16,18 @@ use App\BusinessLogic\Models\UberXOptionsPricingStrategy;
 readonly class BookRideUseCase
 {
 
-    public function __construct(private RideRepository     $rideRepository,
-                                private RiderRepository    $riderRepository,
-                                private TripScanner        $tripScanner,
-                                private BasePriceEvaluator $basePriceEvaluator,
-                                private DateTimeProvider   $dateTimeProvider)
+    public function __construct(private RideRepository       $rideRepository,
+                                private RiderRepository      $riderRepository,
+                                private TripScanner          $tripScanner,
+                                private BasePriceEvaluator   $basePriceEvaluator,
+                                private DateTimeProvider     $dateTimeProvider,
+                                private TransactionPerformer $transactionPerformer)
     {
     }
 
     public function execute(string $departure, string $arrival, bool $wantsUberX): void
     {
+
         $rider = $this->riderRepository->byId("456def");
         $trip = $this->createTrip($departure, $arrival);
         $basePrice = $this->basePriceEvaluator->evaluate($trip);
@@ -39,7 +42,11 @@ readonly class BookRideUseCase
             $wantsUberX,
             $optionsPricingStrategy
         );
-        $this->rideRepository->save($ride);
+        $this->transactionPerformer->perform(function () use ($ride) {
+            $this->rideRepository->save($ride);
+            // $this->domainEventRepository->save($ride->getDomainEvents());
+            throw new \Exception('Transaction failed');
+        });
     }
 
     private function createTrip(string $departure, string $arrival): Trip
