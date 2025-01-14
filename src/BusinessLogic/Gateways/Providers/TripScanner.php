@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\BusinessLogic\Gateways\Providers;
 
 interface TripScanner {
     function distanceBetween(string $departure, string $arrival): float;

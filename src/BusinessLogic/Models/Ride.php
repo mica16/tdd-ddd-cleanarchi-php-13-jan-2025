@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\BusinessLogic\Models;
 
 class Ride
 {
@@ -13,24 +13,22 @@ class Ride
     }
 
     public static function book(Rider     $rider,
-                                string    $departure,
-                                string    $arrival,
+                                Trip      $trip,
                                 \DateTime $currentDate,
                                 float     $basePrice,
-                                float     $distance,
                                 bool      $wantsUberX): Ride
     {
         $isRiderBirthday = $rider->isBirthday($currentDate);
-        $price = $basePrice + $distance * 0.5;
+        $price = $basePrice + $trip->computeKilometersFee();
         if ($wantsUberX) {
             if (!$isRiderBirthday) {
                 $price += 10;
             }
-            if ($distance < 3) {
+            if ($trip->getDistance() < 3) {
                 throw new \Exception("Cannot book an UberX ride for a short trip");
             }
         }
-        return new Ride("123abc", $departure, $arrival, $price);
+        return new Ride("123abc", $trip->getDeparture(), $trip->getArrival(), $price);
     }
 
 }

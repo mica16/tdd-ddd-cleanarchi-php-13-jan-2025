@@ -1,6 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Adapters\Secondary\Gateways\Repositories;
+
+use App\BusinessLogic\Gateways\Repositories\RiderRepository;
+use App\BusinessLogic\Models\Rider;
 
 class FakeRiderRepository implements RiderRepository
 {

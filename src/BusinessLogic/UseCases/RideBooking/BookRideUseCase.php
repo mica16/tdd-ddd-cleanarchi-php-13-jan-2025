@@ -2,12 +2,13 @@
 
 namespace App\BusinessLogic\UseCases\RideBooking;
 
-use App\Models\DateTimeProvider;
-use App\Models\Ride;
-use App\Models\BasePriceEvaluator;
-use App\Models\RiderRepository;
-use App\Repositories\RideRepository;
-use App\Models\TripScanner;
+use App\BusinessLogic\Gateways\Providers\TripScanner;
+use App\BusinessLogic\Gateways\Repositories\RideRepository;
+use App\BusinessLogic\Gateways\Repositories\RiderRepository;
+use App\BusinessLogic\Models\BasePriceEvaluator;
+use App\BusinessLogic\Models\DateTimeProvider;
+use App\BusinessLogic\Models\Ride;
+use App\BusinessLogic\Models\Trip;
 
 readonly class BookRideUseCase
 {
@@ -23,21 +24,24 @@ readonly class BookRideUseCase
     public function execute(string $departure, string $arrival, bool $wantsUberX = false): void
     {
         $rider = $this->riderRepository->byId("456def");
-        $distance = $this->tripScanner->distanceBetween($departure, $arrival);
-        $isDepartureInParis = $this->tripScanner->isAddressInParis($departure);
-        $isArrivalInParis = $this->tripScanner->isAddressInParis($arrival);
-        $tripDirection = ($isDepartureInParis ? "PARIS" : "OUTSIDE") . " => " . ($isArrivalInParis ? "PARIS" : "OUTSIDE");
-        $basePrice = $this->basePriceEvaluator->evaluate($tripDirection);
+        $trip = $this->createTrip($departure, $arrival);
+        $basePrice = $this->basePriceEvaluator->evaluate($trip);
 
         $ride = Ride::book(
             $rider,
-            $departure,
-            $arrival,
+            $trip,
             $this->dateTimeProvider->now(),
             $basePrice,
-            $distance,
             $wantsUberX
         );
         $this->rideRepository->save($ride);
+    }
+
+    private function createTrip(string $departure, string $arrival): Trip
+    {
+        $distance = $this->tripScanner->distanceBetween($departure, $arrival);
+        $isDepartureInParis = $this->tripScanner->isAddressInParis($departure);
+        $isArrivalInParis = $this->tripScanner->isAddressInParis($arrival);
+        return Trip::create($departure, $arrival, $distance, $isDepartureInParis, $isArrivalInParis);
     }
 }

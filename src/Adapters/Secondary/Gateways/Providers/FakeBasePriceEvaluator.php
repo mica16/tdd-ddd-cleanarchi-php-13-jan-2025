@@ -1,6 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Adapters\Secondary\Gateways\Providers;
+
+use App\BusinessLogic\Models\BasePriceEvaluator;
+use App\BusinessLogic\Models\Trip;
 
 class FakeBasePriceEvaluator implements BasePriceEvaluator {
 
@@ -11,8 +14,8 @@ class FakeBasePriceEvaluator implements BasePriceEvaluator {
         "OUTSIDE => OUTSIDE" => 100
     ];
 
-    public function evaluate(string $tripDirection): float
+    public function evaluate(Trip $trip): float
     {
-        return $this->basePricesPerDirections[$tripDirection];
+        return $this->basePricesPerDirections[$trip->getTripDirection()];
     }
 }

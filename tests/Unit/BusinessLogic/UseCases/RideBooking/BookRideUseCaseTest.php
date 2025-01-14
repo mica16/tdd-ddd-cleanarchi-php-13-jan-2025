@@ -2,17 +2,17 @@
 
 namespace App\Tests\Unit\BusinessLogic\UseCases\RideBooking;
 
+use App\Adapters\Secondary\Gateways\Providers\FakeBasePriceEvaluator;
+use App\Adapters\Secondary\Gateways\Providers\TripScanning\FakeTripScanner;
+use App\Adapters\Secondary\Gateways\Repositories\FakeRideRepository;
+use App\Adapters\Secondary\Gateways\Repositories\FakeRiderRepository;
 use App\BusinessLogic\UseCases\RideBooking\BookRideUseCase;
-use App\Models\DeterministicDateTimeProvider;
-use App\Models\FakeRiderRepository;
-use App\Models\Ride;
-use App\Models\Rider;
-use PHPUnit\Framework\TestCase;
-use App\Models\FakeBasePriceEvaluator;
-use PHPUnit\Framework\Attributes\Test;
-use App\Repositories\FakeRideRepository;
-use App\Models\FakeTripScanner;
+use App\BusinessLogic\Models\DeterministicDateTimeProvider;
+use App\BusinessLogic\Models\Ride;
+use App\BusinessLogic\Models\Rider;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 class BookRideUseCaseTest extends TestCase
 {

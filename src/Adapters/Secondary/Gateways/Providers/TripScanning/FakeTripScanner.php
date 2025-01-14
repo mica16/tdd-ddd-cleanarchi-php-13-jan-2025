@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Adapters\Secondary\Gateways\Providers\TripScanning;
+
+use App\BusinessLogic\Gateways\Providers\TripScanner;
 
 class FakeTripScanner implements TripScanner {
 
