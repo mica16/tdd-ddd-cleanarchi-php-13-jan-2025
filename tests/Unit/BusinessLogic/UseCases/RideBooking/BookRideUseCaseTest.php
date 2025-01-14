@@ -55,7 +55,7 @@ class BookRideUseCaseTest extends TestCase
     {
         $this->tripScanner->distance = $distance;
         $this->bookRide($departure, $arrival);
-        $this->assertBookedRides(new Ride($this->rideId, $departure, $arrival, $expectedPrice));
+        $this->assertBookedRides(new Ride($this->rideId, $departure, $arrival, false, $expectedPrice));
     }
 
     #[Test]
@@ -64,7 +64,7 @@ class BookRideUseCaseTest extends TestCase
         $this->tripScanner->distance = 3;
         $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true);
         $this->assertBookedRides(new Ride($this->rideId,
-            'PARIS_ADDRESS', 'PARIS_ADDRESS', 41.5));
+            'PARIS_ADDRESS', 'PARIS_ADDRESS', true, 41.5));
     }
 
     #[Test]
@@ -83,7 +83,7 @@ class BookRideUseCaseTest extends TestCase
         $this->tripScanner->distance = 3;
         $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true);
         $this->assertBookedRides(new Ride($this->rideId,
-            'PARIS_ADDRESS', 'PARIS_ADDRESS', 31.5));
+            'PARIS_ADDRESS', 'PARIS_ADDRESS', true,31.5));
     }
 
     #[Test]
@@ -92,7 +92,7 @@ class BookRideUseCaseTest extends TestCase
         $this->dateTimeProvider->currentDate = new \DateTime('2021-02-03');
         $this->tripScanner->distance = 1;
         $this->expectException(\Exception::class);
-        $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS', true);
+        $this->bookRide('PARIS_ADDRESS', 'PARIS_ADDRESS',true);
         $this->assertBookedRides();
     }
 

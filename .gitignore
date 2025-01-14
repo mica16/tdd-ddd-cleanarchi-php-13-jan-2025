@@ -19,3 +19,8 @@ infection/
 
 docker-postgresql-data-for-test/
 docker-postgresql-data-for-dev/
+
+###> php-cs-fixer/shim ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< php-cs-fixer/shim ###

@@ -1,5 +1,6 @@
 controllers:
     resource:
-        path: ../src/Controller/
-        namespace: App\Controller
+        path: ../src/Adapters/Primary/Symfony/Controllers/
+        namespace: App\Adapters\Primary\Symfony\Controllers
     type: attribute
+    prefix: /api

@@ -36,6 +36,7 @@ readonly class BookRideUseCase
             $rider,
             $trip,
             $basePrice,
+            $wantsUberX,
             $optionsPricingStrategy
         );
         $this->rideRepository->save($ride);
