@@ -7,8 +7,10 @@ use App\BusinessLogic\Gateways\Repositories\RideRepository;
 use App\BusinessLogic\Gateways\Repositories\RiderRepository;
 use App\BusinessLogic\Models\BasePriceEvaluator;
 use App\BusinessLogic\Models\DateTimeProvider;
+use App\BusinessLogic\Models\DefaultOptionsPricingStrategy;
 use App\BusinessLogic\Models\Ride;
 use App\BusinessLogic\Models\Trip;
+use App\BusinessLogic\Models\UberXOptionsPricingStrategy;
 
 readonly class BookRideUseCase
 {
@@ -21,18 +23,20 @@ readonly class BookRideUseCase
     {
     }
 
-    public function execute(string $departure, string $arrival, bool $wantsUberX = false): void
+    public function execute(string $departure, string $arrival, bool $wantsUberX): void
     {
         $rider = $this->riderRepository->byId("456def");
         $trip = $this->createTrip($departure, $arrival);
         $basePrice = $this->basePriceEvaluator->evaluate($trip);
 
+        $optionsPricingStrategy = $wantsUberX ? new UberXOptionsPricingStrategy($this->dateTimeProvider) :
+            new DefaultOptionsPricingStrategy();
+
         $ride = Ride::book(
             $rider,
             $trip,
-            $this->dateTimeProvider->now(),
             $basePrice,
-            $wantsUberX
+            $optionsPricingStrategy
         );
         $this->rideRepository->save($ride);
     }

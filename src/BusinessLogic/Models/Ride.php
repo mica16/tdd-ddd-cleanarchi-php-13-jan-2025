@@ -14,21 +14,12 @@ class Ride
 
     public static function book(Rider     $rider,
                                 Trip      $trip,
-                                \DateTime $currentDate,
                                 float     $basePrice,
-                                bool      $wantsUberX): Ride
+                                OptionsPricingStrategy $optionsPricingStrategy): Ride
     {
-        $isRiderBirthday = $rider->isBirthday($currentDate);
-        $price = $basePrice + $trip->computeKilometersFee();
-        if ($wantsUberX) {
-            if (!$isRiderBirthday) {
-                $price += 10;
-            }
-            if ($trip->getDistance() < 3) {
-                throw new \Exception("Cannot book an UberX ride for a short trip");
-            }
-        }
-        return new Ride("123abc", $trip->getDeparture(), $trip->getArrival(), $price);
+        $tripPrice = $basePrice + $trip->computeKilometersFee();
+        $optionsPrice = $optionsPricingStrategy->apply($trip, $rider);
+        return new Ride("123abc", $trip->getDeparture(), $trip->getArrival(), $tripPrice + $optionsPrice);
     }
 
 }
